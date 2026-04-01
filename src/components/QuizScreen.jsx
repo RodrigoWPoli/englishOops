@@ -44,11 +44,13 @@ export function QuizScreen({ moduleId, questionsPool, moduleData, allModules, ro
   const isSuddenDeath = mode === 'sudden-death';
   const isMystery = moduleId === 'mystery';
 
-  const questions = useMemo(() => {
+  const initialLevelRef = useRef(state?.level);
+
+  const [questions] = useState(() => {
     let pool;
     if (isMystery) {
       const unlockedIds = (allModules || [])
-        .filter(m => m.id !== 'mystery' && state.level >= m.minLevel)
+        .filter(m => m.id !== 'mystery' && initialLevelRef.current >= m.minLevel)
         .map(m => m.id);
       pool = questionsPool.filter(q => unlockedIds.includes(q.module_id));
     } else {
@@ -57,7 +59,7 @@ export function QuizScreen({ moduleId, questionsPool, moduleData, allModules, ro
     const count = isMystery ? MYSTERY_COUNT : QUESTIONS_PER_SESSION;
     const selected = shuffle(pool).slice(0, Math.min(pool.length, count));
     return flattenQuestions(selected);
-  }, [moduleId, questionsPool, allModules, state?.level, isMystery]);
+  });
 
   const [current, setCurrent] = useState(0);
   const [selected, setSelected] = useState(null);
